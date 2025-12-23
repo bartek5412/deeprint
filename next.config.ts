@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+  // output: "export" - usunięte, bo potrzebujemy API routes (wymagają serwera Node.js)
 };
+
 
 export default nextConfig;

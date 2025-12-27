@@ -15,6 +15,10 @@ import {
   FiCheckCircle,
   FiZap,
   FiTrendingUp,
+  FiMenu,
+  FiX,
+  FiBriefcase,
+  FiExternalLink,
 } from "react-icons/fi";
 
 // Illustration components
@@ -332,12 +336,14 @@ const AdminIllustration = () => (
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [activeSection, setActiveSection] = useState("hero");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState<{
     type: "idle" | "loading" | "success" | "error";
     message: string;
   }>({ type: "idle", message: "" });
   const heroRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
+  const portfolioRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -357,6 +363,7 @@ export default function Home() {
       const sections = [
         { id: "hero", ref: heroRef },
         { id: "uslugi", ref: servicesRef },
+        { id: "portfolio", ref: portfolioRef },
         { id: "kontakt", ref: contactRef },
       ];
 
@@ -462,12 +469,39 @@ export default function Home() {
         }}
       />
 
-      {/* Sidebar Navigation */}
+      {/* Mobile Menu Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="fixed top-4 left-4 z-[60] md:hidden w-12 h-12 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border border-slate-200/30 dark:border-slate-800/30 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300 shadow-lg"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? (
+          <FiX className="w-6 h-6" />
+        ) : (
+          <FiMenu className="w-6 h-6" />
+        )}
+      </motion.button>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 z-[55] bg-black/50 backdrop-blur-sm md:hidden"
+        />
+      )}
+
+      {/* Sidebar Navigation - Desktop */}
       <motion.nav
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="fixed left-0 top-0 bottom-0 z-50 w-20 md:w-24 flex flex-col items-center py-8 backdrop-blur-lg bg-white/70 dark:bg-slate-900/70 border-r border-slate-200/30 dark:border-slate-800/30"
+        className="hidden md:flex fixed left-0 top-0 bottom-0 z-50 w-24 flex-col items-center py-8 backdrop-blur-lg bg-white/70 dark:bg-slate-900/70 border-r border-slate-200/30 dark:border-slate-800/30"
       >
         <motion.a
           href="#"
@@ -486,6 +520,12 @@ export default function Home() {
         <div className="flex flex-col gap-8 flex-1">
           {[
             { label: "Usługi", href: "#uslugi", id: "uslugi", icon: FiCode },
+            {
+              label: "Portfolio",
+              href: "#portfolio",
+              id: "portfolio",
+              icon: FiBriefcase,
+            },
             { label: "Kontakt", href: "#kontakt", id: "kontakt", icon: FiMail },
           ].map((item, index) => {
             const isActive = activeSection === item.id;
@@ -517,9 +557,7 @@ export default function Home() {
                     }`}
                   />
                 </div>
-                <span className="text-xs font-medium hidden md:block">
-                  {item.label}
-                </span>
+                <span className="text-xs font-medium">{item.label}</span>
                 <span className="absolute left-full ml-4 px-3 py-1 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                   {item.label}
                 </span>
@@ -537,11 +575,88 @@ export default function Home() {
         </div>
       </motion.nav>
 
+      {/* Mobile Sidebar Navigation */}
+      <motion.nav
+        initial={{ x: -300 }}
+        animate={{ x: isMobileMenuOpen ? 0 : -300 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="fixed left-0 top-0 bottom-0 z-[60] w-64 flex flex-col items-center py-8 backdrop-blur-lg bg-white/95 dark:bg-slate-900/95 border-r border-slate-200/30 dark:border-slate-800/30 md:hidden shadow-2xl"
+      >
+        <motion.a
+          href="#"
+          whileHover={{ scale: 1.1 }}
+          className="mb-12 flex items-center justify-center"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <Image
+            src="/logo.svg"
+            alt="Logo"
+            width={40}
+            height={40}
+            className="dark:invert dark:brightness-0 dark:contrast-200"
+            priority
+          />
+        </motion.a>
+        <div className="flex flex-col gap-6 flex-1 w-full px-4">
+          {[
+            { label: "Usługi", href: "#uslugi", id: "uslugi", icon: FiCode },
+            {
+              label: "Portfolio",
+              href: "#portfolio",
+              id: "portfolio",
+              icon: FiBriefcase,
+            },
+            { label: "Kontakt", href: "#kontakt", id: "kontakt", icon: FiMail },
+          ].map((item, index) => {
+            const isActive = activeSection === item.id;
+            return (
+              <motion.a
+                key={item.label}
+                href={item.href}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 + 0.3 }}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`group relative flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? "text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/40 shadow-lg shadow-indigo-500/20"
+                    : "text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    isActive
+                      ? "bg-indigo-200 dark:bg-indigo-800"
+                      : "bg-slate-100 dark:bg-slate-800 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30"
+                  }`}
+                >
+                  <item.icon
+                    className={`w-5 h-5 ${
+                      isActive ? "text-indigo-600 dark:text-indigo-400" : ""
+                    }`}
+                  />
+                </div>
+                <span className="text-base font-medium">{item.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeIndicatorMobile"
+                    className="absolute left-0 w-1 h-full bg-gradient-to-b from-indigo-600 to-purple-600 rounded-r-full"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+              </motion.a>
+            );
+          })}
+        </div>
+      </motion.nav>
+
       {/* Hero Section */}
       <motion.section
         ref={heroRef}
         style={{ y }}
-        className="relative min-h-screen flex items-center justify-center px-6 py-20 md:py-32 ml-20 md:ml-24"
+        className="relative min-h-screen flex items-center justify-center px-6 py-20 md:py-32 md:ml-24"
       >
         {/* Hero Illustration */}
         <motion.div
@@ -750,7 +865,7 @@ export default function Home() {
       <section
         id="uslugi"
         ref={servicesRef}
-        className="relative py-40 px-6 scroll-mt-20 ml-20 md:ml-24 overflow-hidden"
+        className="relative py-40 px-6 scroll-mt-20 md:ml-24 overflow-hidden"
       >
         {/* Decorative background graphics */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob" />
@@ -866,11 +981,170 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Portfolio Section */}
+      <section
+        id="portfolio"
+        ref={portfolioRef}
+        className="relative py-40 px-6 scroll-mt-20 md:ml-24 overflow-hidden"
+      >
+        {/* Decorative background graphics */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-200 dark:bg-indigo-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-200 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5 tracking-tight">
+              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Przykłady moich realizacji
+              </span>
+            </h2>
+            {/* <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Zobacz przykłady moich realizacji
+            </p> */}
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {(
+              [
+                {
+                  title: "Fundacja na rzecz Collegium Polonicum",
+                  description:
+                    "Nowoczesna strona internetowa z responsywnym designem i prostymi animacjami.",
+                  image: "/fundacjacp.png",
+                  technologies: [
+                    "TypeScript",
+                    "Tailwind CSS",
+                    "React",
+                    "WordPress",
+                  ],
+                  link: "https://cp.deeprint.pl",
+                  gradient: "from-blue-500 to-cyan-500",
+                },
+                {
+                  title: "Selector - własne oferty 3D",
+                  description:
+                    "Aplikacja webowa pozwalająca ofertować swoje produkty z wizualizacją 3D.",
+                  image: "/selector.png",
+                  technologies: [
+                    "React",
+                    "TypeScript",
+                    "Tailwind CSS",
+                    "Three.js",
+                    "Next.js",
+                  ],
+                  
+                  link: "https://selector.deeprint.pl",
+                  gradient: "from-purple-500 to-pink-500",
+                },
+              ] as Array<{
+                title: string;
+                description: string;
+                image: string;
+                video?: string;
+                technologies: string[];
+                link: string;
+                gradient: string;
+              }>
+            ).map((project, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="group relative bg-white/70 dark:bg-slate-900/70 backdrop-blur-md rounded-3xl border border-slate-200/40 dark:border-slate-800/40 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden"
+              >
+                {/* Media Container */}
+                <div className="relative h-48 overflow-hidden">
+                  {project.video ? (
+                    <video
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    >
+                      <source src={project.video} type="video/mp4" />
+                      <source src={project.video} type="video/webm" />
+                      {/* Fallback do obrazu jeśli wideo się nie załaduje */}
+                      {project.image && (
+                        <div
+                          className="absolute inset-0 bg-cover bg-center"
+                          style={{
+                            backgroundImage: `url(${project.image})`,
+                          }}
+                        />
+                      )}
+                    </video>
+                  ) : (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                      style={{
+                        backgroundImage: `url(${project.image})`,
+                      }}
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 line-clamp-3">
+                    {project.description}
+                  </p>
+
+                  {/* Technologies */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.technologies.map((tech, techIndex) => (
+                      <span
+                        key={techIndex}
+                        className="px-3 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Link */}
+                  <motion.a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ x: 4 }}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  >
+                    Zobacz projekt
+                    <FiExternalLink className="w-4 h-4" />
+                  </motion.a>
+                </div>
+
+                {/* Hover gradient overlay */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none`}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Call to action */}
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section
         id="kontakt"
         ref={contactRef}
-        className="relative py-40 px-6 scroll-mt-20 ml-20 md:ml-24 overflow-hidden"
+        className="relative py-40 px-6 scroll-mt-20 md:ml-24 overflow-hidden"
       >
         {/* Decorative background graphics */}
         <div className="absolute top-20 left-20 w-72 h-72 bg-indigo-200 dark:bg-indigo-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-blob" />
